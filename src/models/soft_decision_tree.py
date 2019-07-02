@@ -1,16 +1,21 @@
 import numpy as np
 import os
 import tensorflow as tf
+from pathlib import Path
 from tensorflow.keras import backend as tfk
 from tensorflow.keras.initializers import RandomNormal, TruncatedNormal
 from tensorflow.keras.layers import Input, Dense, Activation, Layer, Lambda, Concatenate
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import EarlyStopping, Callback
+from tensorflow.keras.backend import set_session
+
+import src.utils as utils
 
 
 class TrainableVar(Layer):
     """
-    Creates a variable that"s trainable with keras model. Needs to be attached
+    Creates a variable that's trainable with keras model. Needs to be attached
     to some node that conditions optimizer op.
     """
 
@@ -79,7 +84,7 @@ class OutputLayer(Layer):
 
         return outputs  # shape=(batch_size, n_classes)
 
-# ----------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------
     
 
 class Node(object):
@@ -180,31 +185,55 @@ class Node(object):
         else:
             # Return decayed penalty term of this (inner) node
             return tree.penalty_strength * self.get_penalty(tree) * (
-                tree.penalty_decay**self.depth)
+                tree.penalty_decay ** self.depth)
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------
 
 
 class SoftBinaryDecisionTree(object):
-    def __init__(self, max_depth, n_features, n_classes,
-                 penalty_strength=10.0, penalty_decay=0.5, inv_temp=0.01,
-                 ema_win_size=100, learning_rate=3e-4, metrics=["acc"], name="sdt"):
+
+    def __init__(self, name: str, num_inputs: int, num_outputs: int, *args, **kwargs):
         """
         Initialize model instance by saving parameter values
         as model properties and creating others as placeholders.
         """
         self.name = name
 
-        # save hyperparameters
-        self.max_depth = max_depth
-        self.n_features = n_features
-        self.n_classes = n_classes
+        # If true, training info is outputted to stdout
+        self.keras_verbose = True
+        # A summary of the NN is printed to stdout
+        self.print_model_summary = False
 
-        self.penalty_strength = penalty_strength
-        self.penalty_decay = penalty_decay
-        self.inv_temp = inv_temp
-        self.ema_win_size = ema_win_size
+        # --------------------------------------------------------------------------------
+
+        def brand_new_tfsession(sess=None):
+
+            if sess:
+                tf.reset_default_graph()
+                sess.close()
+
+            tf.reset_default_graph()
+            config = tf.ConfigProto()
+            config.gpu_options.allow_growth = True
+            sess = tf.Session(config=config)
+            set_session(sess)
+
+            return sess
+
+        self.sess = brand_new_tfsession()
+
+        # --------------------------------------------------------------------------------
+
+        # Hyperparameters
+        self.max_depth = 4
+        self.n_features = num_inputs
+        self.n_classes = num_outputs
+
+        self.penalty_strength = 1e+1
+        self.penalty_decay = 0.25
+        self.inv_temp = 0.01
+        self.ema_win_size = 1000
 
         self.nodes = list()
         self.bigot_opinions = list()
@@ -214,9 +243,12 @@ class SoftBinaryDecisionTree(object):
         self.loss = 0.0
         self.loss_leaves = 0.0
         self.loss_penalty = 0.0
+        self.learning_rate = 5e-03
+        self.epochs = 40
+        self.batch_size = 4
 
-        self.optimizer = Adam(lr=learning_rate)
-        self.metrics = metrics
+        self.optimizer = Adam(lr=self.learning_rate)
+        self.metrics = ["acc"]
 
         self.eps = tfk.constant(1e-8, shape=(1,), dtype="float32")
         self.initialized = False
@@ -226,6 +258,9 @@ class SoftBinaryDecisionTree(object):
         self.output_layer = None
         self.model = None
         self.saver = None
+
+        # If this many stagnant epochs are seen, stop training
+        self.stopping_patience = 20
 
     def build_model(self):
         self.input_layer = Input(shape=(self.n_features,), dtype="float32")
@@ -271,6 +306,10 @@ class SoftBinaryDecisionTree(object):
 
         self.model.compile(optimizer=self.optimizer, loss=tree_loss, metrics=self.metrics)
 
+        if self.print_model_summary:
+            print("")
+            self.model.summary()
+
         self.saver = tf.train.Saver()
 
     def initialize_variables(self, sess, x, batch_size):
@@ -302,133 +341,77 @@ class SoftBinaryDecisionTree(object):
         sess.run(init_ema_vars_op, feed_dict=feed_dict)
         self.initialized = True
 
-    def save_variables(self, sess, path):
+    def train(self, x_train: np.ndarray, y_train: np.ndarray, x_valid: np.ndarray, y_valid: np.ndarray) -> None:
+
+        # Build the model
+        self.build_model()
+
+        # Initialize variables
+        self.initialize_variables(self.sess, x_train, self.batch_size)
+
+        # What we want back from Keras
+        callbacks_list = []
+
+        # The default patience is stopping_patience
+        patience = self.stopping_patience
+
+        # Create an early stopping callback and add it
+        callbacks_list.append(
+            EarlyStopping(
+                verbose=1,
+                monitor='val_acc',
+                patience=patience))
+
+        # Train the model
+        training_process = self.model.fit(
+            x=x_train,
+            y=y_train,
+            epochs=self.epochs,
+            batch_size=self.batch_size,
+            callbacks=callbacks_list,
+            validation_data=(x_valid, y_valid),
+            verbose=self.keras_verbose
+        )
+
+    def evaluate(self, x_test: np.ndarray, y_test: np.ndarray) -> tuple:
+        if self.model and self.initialized:
+            score = self.model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=0)
+            test_loss = score[0]
+            test_accuracy = score[1]
+            print("accuracy: {:.2f}% | loss: {}".format(100 * test_accuracy, test_loss))
+            return test_loss, test_accuracy
+        else:
+            print("Missing initialized model instance.")
+
+    def save(self):
         """
         Keras saving methods such as model.save() or model.save_weights()
         are not suitable, since Keras won"t serialize tf.Tensor objects which
         get included into saving process as arguments of Lambda layers.
         """
-        self.saver.save(sess, path)
+        project_dir = Path(__file__).resolve().parents[2]
+        models_dir = str(project_dir) + '/models/' + self.name + '/'
+        utils.check_folder(models_dir)
+        self.saver.save(self.sess, models_dir + self.name)
+        print("Saved model to disk")
 
-    def load_variables(self, sess, path):
-        self.saver.restore(sess, path)
-        self.initialized = True
-
-    def train_or_load(self, sess, data_train, data_valid,
-                    batch_size, epochs, callbacks=None, distill=False):
-
-        DIR_ASSETS = "./assets/"
-        DIR_DISTILL = "distilled/"
-        DIR_NON_DISTILL = "non-distilled/"
-        DIR_MODEL = DIR_ASSETS + (DIR_DISTILL if distill else DIR_NON_DISTILL)
-        PATH_MODEL = DIR_MODEL + "tree-model"
-
+    def load(self):
         try:
-            print("Loading trained model from {}.".format(PATH_MODEL))
-            self.load_variables(sess, PATH_MODEL)
-            return
+            # Build the model
+            self.build_model()
+
+            project_dir = Path(__file__).resolve().parents[2]
+            models_dir = str(project_dir) + '/models/' + self.name + '/'
+            utils.check_folder(models_dir)
+            self.saver.restore(self.sess, models_dir + self.name)
+            self.initialized = True
+            print("Loaded " + self.name + " model from disk")
+
         except ValueError as e:
-            print("{} is not a valid checkpoint. Training from scratch.".format(
-                PATH_MODEL))
-            x_train, y_train = data_train
-            self.initialize_variables(sess, x_train, batch_size)
-            self.model.fit(
-                x_train, y_train, validation_data=data_valid,
-                batch_size=batch_size, epochs=epochs, callbacks=callbacks)
-            print("Saving trained model to {}.".format(PATH_MODEL))
-            if not os.path.isdir(DIR_MODEL):
-                os.mkdir(DIR_MODEL)
-            self.save_variables(sess, PATH_MODEL)
+            print("No saved model found. Check file name or train from scratch")
 
-    def evaluate(self, x, y, batch_size):
-        if self.model and self.initialized:
-            score = self.model.evaluate(x, y, batch_size)
-            print("accuracy: {:.2f}% | loss: {}".format(100 * score[1], score[0]))
-        else:
-            print("Missing initialized model instance.")
-
-    def predict(self, x):
+    def predict(self, x: np.ndarray) -> np.ndarray:
         if self.model and self.initialized:
             return self.model.predict(x, verbose=1)
         else:
             print("Missing initialized model instance.")
-
-# TODO: Create _results and _datasets directory
-
-
-if __name__ == "__main__":
-
-    from tensorflow.keras.callbacks import EarlyStopping, Callback
-
-    def brand_new_tfsession(sess=None):
-
-        import tensorflow as tf
-        from tensorflow.keras.backend import set_session
-
-        if sess:
-            tf.reset_default_graph()
-            sess.close()
-
-        tf.reset_default_graph()
-        config = tf.ConfigProto()
-        config.gpu_options.allow_growth = True
-        sess = tf.Session(config=config)
-        set_session(sess)
-
-        return sess
-
-
-    sess = brand_new_tfsession()
-
-    # load MNIST data
-    mnist = tf.keras.datasets.mnist
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
-
-    # hold out last 10000 training samples for validation
-    x_valid, y_valid = x_train[-10000:], y_train[-10000:]
-    x_train, y_train = x_train[:-10000], y_train[:-10000]
-
-    # retrieve image and label shapes from training data
-    img_rows, img_cols = x_train.shape[1:]
-    n_classes = np.unique(y_train).shape[0]
-
-    # convert labels to 1-hot vectors
-    y_train = tf.keras.utils.to_categorical(y_train, n_classes)
-    y_valid = tf.keras.utils.to_categorical(y_valid, n_classes)
-    y_test = tf.keras.utils.to_categorical(y_test, n_classes)
-
-    # normalize inputs and cast to float
-    x_train = (x_train / np.max(x_train)).astype(np.float32)
-    x_valid = (x_valid / np.max(x_valid)).astype(np.float32)
-    x_test = (x_test / np.max(x_test)).astype(np.float32)
-
-    x_train_flat = x_train.reshape((x_train.shape[0], -1))
-    x_valid_flat = x_valid.reshape((x_valid.shape[0], -1))
-    x_test_flat = x_test.reshape((x_test.shape[0], -1))
-
-    n_features = img_rows * img_cols
-    tree_depth = 4
-    penalty_strength = 1e+1
-    penalty_decay = 0.25
-    ema_win_size = 1000
-    inv_temp = 0.01
-    learning_rate = 5e-03
-    batch_size = 4
-
-    sess = brand_new_tfsession(sess)
-
-    soft_tree = SoftBinaryDecisionTree(tree_depth, n_features, n_classes,
-                                       penalty_strength=penalty_strength, penalty_decay=penalty_decay,
-                                       inv_temp=inv_temp, ema_win_size=ema_win_size, learning_rate=learning_rate)
-    soft_tree.build_model()
-
-    epochs = 40
-
-    es = EarlyStopping(monitor="val_acc", patience=20, verbose=1)
-
-    soft_tree.train_or_load(
-        sess=sess, data_train=(x_train_flat, y_train), data_valid=(x_valid_flat, y_valid),
-        batch_size=batch_size, epochs=epochs, callbacks=[es])
-
-    soft_tree.evaluate(x=x_valid_flat, y=y_valid, batch_size=batch_size)
-    soft_tree.evaluate(x=x_test_flat, y=y_test, batch_size=batch_size)

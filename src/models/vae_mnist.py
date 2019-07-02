@@ -16,6 +16,8 @@ x_train = x_train.astype('float32') / 255.
 x_test = x_test.astype('float32') / 255.
 
 x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
+print(np.shape(x_train))
+quit(-1)
 x_test = x_test.reshape((len(x_test), np.prod(x_train.shape[1:])))
 
 # Set parameters
