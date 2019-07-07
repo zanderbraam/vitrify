@@ -10,7 +10,7 @@ from dotenv import find_dotenv, load_dotenv
 import src.utils as utils
 
 
-def make_dateset(dataset="MNIST"):
+def make_dataset(dataset="MNIST"):
     """
     Fetches the raw datasets, split them into train, test and validation sets,
     does the necessary processing and saves it to data (../data).
@@ -176,4 +176,4 @@ def make_dateset(dataset="MNIST"):
 
 if __name__ == "__main__":
 
-    make_dateset(dataset="MNIST")
+    make_dataset(dataset="MNIST")

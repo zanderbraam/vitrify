@@ -29,7 +29,7 @@ class VariationalAutoEncoder:
         # If true, training info is outputted to stdout
         self.keras_verbose = False
         # A summary of the NN is printed to stdout
-        self.print_model_summary = True
+        self.print_model_summary = False
 
         # Size of latent dimension
         self.latent_dim = 20
@@ -224,38 +224,44 @@ class VariationalAutoEncoder:
             print("")
             self.model.summary()
 
-    def train(self, x_train: np.ndarray, x_valid: np.ndarray) -> None:
+    def train(self, x_train: np.ndarray, x_valid: np.ndarray, load_model=True) -> None:
 
-        # What we want back from Keras
-        callbacks_list = []
+        if load_model:
+            self.load()
 
-        # The default patience is stopping_patience
-        patience = self.stopping_patience
+        else:
+            # What we want back from Keras
+            callbacks_list = []
 
-        # Create an early stopping callback and add it
-        callbacks_list.append(
-            EarlyStopping(
-                verbose=1,
-                monitor='val_loss',
-                patience=self.stopping_patience))
+            # The default patience is stopping_patience
+            patience = self.stopping_patience
 
-        # TODO: Double check parameter patience and monitor!
+            # Create an early stopping callback and add it
+            callbacks_list.append(
+                EarlyStopping(
+                    verbose=1,
+                    monitor='val_loss',
+                    patience=self.stopping_patience))
 
-        # Train the model
-        training_process = self.model.fit(
-            x=x_train,
-            epochs=self.epochs,
-            shuffle=True,
-            batch_size=self.batch_size,
-            verbose=self.keras_verbose,
-            callbacks=callbacks_list,
-            validation_data=(x_valid, None)
-        )
+            # TODO: Double check parameter patience and monitor!
+
+            # Train the model
+            training_process = self.model.fit(
+                x=x_train,
+                epochs=self.epochs,
+                shuffle=True,
+                batch_size=self.batch_size,
+                verbose=self.keras_verbose,
+                callbacks=callbacks_list,
+                validation_data=(x_valid, None)
+            )
+
+            self.save()
 
     def evaluate(self, x_test: np.ndarray) -> tuple:
         score = self.model.evaluate(x_test, verbose=0)
-        print("loss: {}".format(score))
-        return score
+        print("accuracy: Nan | loss: {}".format(score))
+        return score, 0.0
 
     def save(self):
         project_dir = Path(__file__).resolve().parents[2]

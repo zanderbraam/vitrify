@@ -201,7 +201,7 @@ class SoftBinaryDecisionTree(object):
         self.name = name
 
         # If true, training info is outputted to stdout
-        self.keras_verbose = True
+        self.keras_verbose = False
         # A summary of the NN is printed to stdout
         self.print_model_summary = False
 
@@ -341,37 +341,43 @@ class SoftBinaryDecisionTree(object):
         sess.run(init_ema_vars_op, feed_dict=feed_dict)
         self.initialized = True
 
-    def train(self, x_train: np.ndarray, y_train: np.ndarray, x_valid: np.ndarray, y_valid: np.ndarray) -> None:
+    def train(self, x_train: np.ndarray, y_train: np.ndarray, x_valid: np.ndarray, y_valid: np.ndarray, load_model=True) -> None:
 
-        # Build the model
-        self.build_model()
+        if load_model:
+            self.load()
 
-        # Initialize variables
-        self.initialize_variables(self.sess, x_train, self.batch_size)
+        else:
+            # Build the model
+            self.build_model()
 
-        # What we want back from Keras
-        callbacks_list = []
+            # Initialize variables
+            self.initialize_variables(self.sess, x_train, self.batch_size)
 
-        # The default patience is stopping_patience
-        patience = self.stopping_patience
+            # What we want back from Keras
+            callbacks_list = []
 
-        # Create an early stopping callback and add it
-        callbacks_list.append(
-            EarlyStopping(
-                verbose=1,
-                monitor='val_acc',
-                patience=patience))
+            # The default patience is stopping_patience
+            patience = self.stopping_patience
 
-        # Train the model
-        training_process = self.model.fit(
-            x=x_train,
-            y=y_train,
-            epochs=self.epochs,
-            batch_size=self.batch_size,
-            callbacks=callbacks_list,
-            validation_data=(x_valid, y_valid),
-            verbose=self.keras_verbose
-        )
+            # Create an early stopping callback and add it
+            callbacks_list.append(
+                EarlyStopping(
+                    verbose=1,
+                    monitor='val_acc',
+                    patience=patience))
+
+            # Train the model
+            training_process = self.model.fit(
+                x=x_train,
+                y=y_train,
+                epochs=self.epochs,
+                batch_size=self.batch_size,
+                callbacks=callbacks_list,
+                validation_data=(x_valid, y_valid),
+                verbose=self.keras_verbose
+            )
+
+            self.save()
 
     def evaluate(self, x_test: np.ndarray, y_test: np.ndarray) -> tuple:
         if self.model and self.initialized:

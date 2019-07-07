@@ -112,31 +112,37 @@ class MultiLayerPerceptron:
             print("")
             self.model.summary()
 
-    def train(self, x_train: np.ndarray, y_train: np.ndarray, x_valid: np.ndarray, y_valid: np.ndarray) -> None:
+    def train(self, x_train: np.ndarray, y_train: np.ndarray, x_valid: np.ndarray, y_valid: np.ndarray, load_model=True) -> None:
 
-        # What we want back from Keras
-        callbacks_list = []
+        if load_model:
+            self.load()
 
-        # The default patience is stopping_patience
-        patience = self.stopping_patience
+        else:
+            # What we want back from Keras
+            callbacks_list = []
 
-        # Create an early stopping callback and add it
-        callbacks_list.append(
-            EarlyStopping(
-                verbose=1,
-                monitor='val_acc',
-                patience=patience))
+            # The default patience is stopping_patience
+            patience = self.stopping_patience
 
-        # Train the model
-        training_process = self.model.fit(
-            x=x_train,
-            y=y_train,
-            epochs=self.epochs,
-            batch_size=self.batch_size,
-            verbose=self.keras_verbose,
-            callbacks=callbacks_list,
-            validation_data=(x_valid, y_valid)
-        )
+            # Create an early stopping callback and add it
+            callbacks_list.append(
+                EarlyStopping(
+                    verbose=1,
+                    monitor='val_acc',
+                    patience=patience))
+
+            # Train the model
+            training_process = self.model.fit(
+                x=x_train,
+                y=y_train,
+                epochs=self.epochs,
+                batch_size=self.batch_size,
+                verbose=self.keras_verbose,
+                callbacks=callbacks_list,
+                validation_data=(x_valid, y_valid)
+            )
+
+            self.save()
 
     def evaluate(self, x_test: np.ndarray, y_test: np.ndarray) -> tuple:
         score = self.model.evaluate(x_test, y_test, batch_size=self.batch_size, verbose=0)
