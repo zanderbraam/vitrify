@@ -7,6 +7,7 @@ from keras.models import Model
 from keras.optimizers import Adam
 from keras.regularizers import l2
 from keras import backend as K
+from keras.utils import plot_model
 
 import src.utils as utils
 
@@ -26,7 +27,7 @@ class VariationalAutoEncoder:
         self.num_outputs = num_inputs
 
         # If true, training info is outputted to stdout
-        self.keras_verbose = True
+        self.keras_verbose = False
         # A summary of the NN is printed to stdout
         self.print_model_summary = True
 
@@ -282,3 +283,8 @@ class VariationalAutoEncoder:
         randoms = [np.random.normal(0, 1, self.latent_dim) for _ in range(n)]
         imgs = self.decoder.predict(np.array([randoms]).squeeze())
         return imgs
+
+    def plot_model(self):
+        plot_model(self.model, to_file=self.name + "_model.png", show_shapes=True)
+        plot_model(self.encoder, to_file=self.name + "_encoder.png", show_shapes=True)
+        plot_model(self.decoder, to_file=self.name + "_decoder.png", show_shapes=True)

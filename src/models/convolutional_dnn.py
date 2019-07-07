@@ -6,6 +6,7 @@ from keras.models import load_model
 from keras.models import Model
 from keras.optimizers import Adam
 from keras.regularizers import l2
+from keras.utils import plot_model
 
 import keras.backend as K
 
@@ -243,3 +244,6 @@ class ConvDNN:
     def predict(self, x: np.ndarray) -> np.ndarray:
         prediction = self.model.predict(x)
         return prediction
+
+    def plot_model(self):
+        plot_model(self.model, to_file=self.name + "_model.png", show_shapes=True)
