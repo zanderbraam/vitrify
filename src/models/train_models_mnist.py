@@ -1,51 +1,12 @@
-import os
-
 from src.models.multi_layer_perceptron import MultiLayerPerceptron
 from src.models.soft_decision_tree import SoftBinaryDecisionTree
 from src.models.variational_autoencoder import VariationalAutoEncoder
 from src.models.convolutional_dnn import ConvDNN
-from src.data.make_dataset import make_dataset
+from src.data.make_dataset import load_data, join_data
 from src.visualization.visualize import draw_tree
-
-from pathlib import Path
 
 import numpy as np
 from sklearn.utils import shuffle
-
-
-def load_data(dataset: str, already_downloaded=True):
-
-    # Create an empty data dictionary that contains all the relevant data
-    data_dict = {}
-    if already_downloaded:
-        project_dir = Path(__file__).resolve().parents[2]
-        data_dir = str(project_dir) + '/data/' + dataset
-
-        for f in os.listdir(data_dir):
-            data_dict[f.replace(".npy", "")] = np.load(os.path.join(data_dir, f))
-
-        return data_dict
-
-    else:
-        make_dataset(dataset)
-        project_dir = Path(__file__).resolve().parents[2]
-        data_dir = str(project_dir) + '/data/' + dataset
-
-        for f in os.listdir(data_dir):
-            data_dict[f.replace(".npy", "")] = np.load(os.path.join(data_dir, f))
-
-        return data_dict
-
-
-def join_data(data: list) -> np.ndarray:
-    new_data = data[0]
-    for i in range(len(data) - 1):
-        new_data = np.vstack((new_data, data[i + 1]))
-    return new_data
-
-
-def save_results(json_file, path):
-    pass
 
 
 def train_models():
@@ -169,13 +130,13 @@ def train_models():
     # Visualize tree
     # draw_tree(sdt_raw, n_rows, n_cols)
 
-    digit = 2
-
-    sample_index = np.random.choice(np.where(np.argmax(data["y_test_one_hot"], axis=1) == digit)[0])
-    input_img = data["x_test"][sample_index]
-
-    draw_tree(sdt_raw, n_rows, n_cols, input_img=input_img, show_correlation=True)
-    quit(-1)
+    # digit = 1
+    #
+    # sample_index = np.random.choice(np.where(np.argmax(data["y_test_one_hot"], axis=1) == digit)[0])
+    # input_img = data["x_test"][sample_index]
+    #
+    # draw_tree(sdt_raw, n_rows, n_cols, input_img=input_img, show_correlation=True)
+    # quit(-1)
 
     # --------------------------------------------------------------------------------
     # # TRAIN A SOFT DECISION TREE TO APPROXIMATE THE MULTI-LAYER PERCEPTRON
@@ -208,6 +169,14 @@ def train_models():
 
     # Evaluate SDT CNN
     sdt_cnn_results = sdt_cnn.evaluate(data["x_test_flat"], data["y_test_one_hot"])
+
+    digit = 8
+
+    sample_index = np.random.choice(np.where(np.argmax(data["y_test_one_hot"], axis=1) == digit)[0])
+    input_img = data["x_test"][sample_index]
+
+    draw_tree(sdt_cnn, n_rows, n_cols, input_img=input_img, show_correlation=True)
+    quit(-1)
 
     # --------------------------------------------------------------------------------
     # TRAIN A SOFT DECISION TREE TO APPROXIMATE THE CNN WITH VAE

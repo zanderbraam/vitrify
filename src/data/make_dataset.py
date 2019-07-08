@@ -1,11 +1,10 @@
-import logging
+import os
 
 import tensorflow as tf
 import numpy as np
 import pandas as pd
 
 from pathlib import Path
-from dotenv import find_dotenv, load_dotenv
 
 import src.utils as utils
 
@@ -172,6 +171,37 @@ def make_dataset(dataset="MNIST"):
 
     else:
         print("Please choose either: 'MNIST', 'Letter' or 'Connect4'.")
+
+
+def load_data(dataset: str, already_downloaded=True):
+
+    # Create an empty data dictionary that contains all the relevant data
+    data_dict = {}
+    if already_downloaded:
+        project_dir = Path(__file__).resolve().parents[2]
+        data_dir = str(project_dir) + '/data/' + dataset
+
+        for f in os.listdir(data_dir):
+            data_dict[f.replace(".npy", "")] = np.load(os.path.join(data_dir, f))
+
+        return data_dict
+
+    else:
+        make_dataset(dataset)
+        project_dir = Path(__file__).resolve().parents[2]
+        data_dir = str(project_dir) + '/data/' + dataset
+
+        for f in os.listdir(data_dir):
+            data_dict[f.replace(".npy", "")] = np.load(os.path.join(data_dir, f))
+
+        return data_dict
+
+
+def join_data(data: list) -> np.ndarray:
+    new_data = data[0]
+    for i in range(len(data) - 1):
+        new_data = np.vstack((new_data, data[i + 1]))
+    return new_data
 
 
 if __name__ == "__main__":
