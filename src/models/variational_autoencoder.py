@@ -58,7 +58,7 @@ class VariationalAutoEncoder:
         self.final_activation = "sigmoid"
         # The maximum number of epochs to run
         self.epochs = 100
-        # The batch size to use in the NN
+        # The batch size to use in the VAE
         self.batch_size = 250
         # The learning rate used in optimization
         self.learning_rate = 0.001
