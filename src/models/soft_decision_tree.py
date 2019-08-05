@@ -193,7 +193,7 @@ class Node(object):
 
 class SoftBinaryDecisionTree(object):
 
-    def __init__(self, name: str, num_inputs: int, num_outputs: int, *args, **kwargs):
+    def __init__(self, name: str, num_inputs: int, num_outputs: int, max_depth=4, *args, **kwargs):
         """
         Initialize model instance by saving parameter values
         as model properties and creating others as placeholders.
@@ -226,7 +226,7 @@ class SoftBinaryDecisionTree(object):
         # --------------------------------------------------------------------------------
 
         # Hyperparameters
-        self.max_depth = 4
+        self.max_depth = max_depth
         self.n_features = num_inputs
         self.n_classes = num_outputs
 
