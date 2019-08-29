@@ -10,8 +10,6 @@ def check_folder(log_dir):
 
 def balanced_sample_maker(x, y, data_size, random_seed=None):
     """ Return a balanced data set by sampling all classes with sample_size
-        current version is developed on assumption that the positive
-        class is the minority.
 
     Parameters:
     ===========

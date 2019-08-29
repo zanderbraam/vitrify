@@ -193,17 +193,37 @@ class Node(object):
 
 class SoftBinaryDecisionTree(object):
 
-    def __init__(self, name: str, num_inputs: int, num_outputs: int, max_depth=4, *args, **kwargs):
+    def __init__(self, name: str, num_inputs: int, num_outputs: int, *args, **kwargs):
         """
         Initialize model instance by saving parameter values
         as model properties and creating others as placeholders.
         """
+
         self.name = name
+
+        self.n_features = num_inputs
+        self.n_classes = num_outputs
 
         # If true, training info is outputted to stdout
         self.keras_verbose = False
         # A summary of the NN is printed to stdout
         self.print_model_summary = False
+
+        # Hyperparameters
+        self.max_depth = 4
+        self.penalty_strength = 1e+1
+        self.penalty_decay = 0.25
+        self.inv_temp = 0.01
+        self.ema_win_size = 1000
+
+        self.learning_rate = 5e-03
+        self.epochs = 40
+        self.batch_size = 4
+
+        # If this many stagnant epochs are seen, stop training
+        self.stopping_patience = 20
+
+        self.__dict__.update(kwargs)
 
         # --------------------------------------------------------------------------------
 
@@ -225,15 +245,9 @@ class SoftBinaryDecisionTree(object):
 
         # --------------------------------------------------------------------------------
 
-        # Hyperparameters
-        self.max_depth = max_depth
-        self.n_features = num_inputs
-        self.n_classes = num_outputs
-
-        self.penalty_strength = 1e+1
-        self.penalty_decay = 0.25
-        self.inv_temp = 0.01
-        self.ema_win_size = 1000
+        # Internal variables: Do not alter!
+        self.optimizer = Adam(lr=self.learning_rate)
+        self.metrics = ["acc"]
 
         self.nodes = list()
         self.bigot_opinions = list()
@@ -243,12 +257,6 @@ class SoftBinaryDecisionTree(object):
         self.loss = 0.0
         self.loss_leaves = 0.0
         self.loss_penalty = 0.0
-        self.learning_rate = 5e-03
-        self.epochs = 40
-        self.batch_size = 4
-
-        self.optimizer = Adam(lr=self.learning_rate)
-        self.metrics = ["acc"]
 
         self.eps = tfk.constant(1e-8, shape=(1,), dtype="float32")
         self.initialized = False
@@ -258,9 +266,6 @@ class SoftBinaryDecisionTree(object):
         self.output_layer = None
         self.model = None
         self.saver = None
-
-        # If this many stagnant epochs are seen, stop training
-        self.stopping_patience = 20
 
     def build_model(self):
         self.input_layer = Input(shape=(self.n_features,), dtype="float32")
@@ -371,6 +376,7 @@ class SoftBinaryDecisionTree(object):
                 x=x_train,
                 y=y_train,
                 epochs=self.epochs,
+                shuffle=True,
                 batch_size=self.batch_size,
                 callbacks=callbacks_list,
                 validation_data=(x_valid, y_valid),

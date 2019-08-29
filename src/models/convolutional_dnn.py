@@ -43,7 +43,7 @@ class ConvDNN:
             ["max_pool2d", (2, 2), None, "valid", 0.25],
         ]
 
-        # ff_layers = [units, activation, regularization, dropout, use_bias]
+        # ff_layers = [units, activation, regularization, dropout, use_bias, dropout_type]
         self.ff_layers = [
             [128, "relu", 0.0, 0.2, True, "normal"]
         ]
@@ -58,10 +58,13 @@ class ConvDNN:
         self.batch_size = 128
         # The learning rate used in optimization
         self.learning_rate = 0.001
-        # The optimization algorithm to use
-        self.optimizer = Adam(lr=self.learning_rate)
         # If this many stagnant epochs are seen, stop training
         self.stopping_patience = 20
+
+        self.__dict__.update(kwargs)
+
+        # The optimization algorithm to use
+        self.optimizer = Adam(lr=self.learning_rate)
 
         # --------------------------------------------------------------------------------
 

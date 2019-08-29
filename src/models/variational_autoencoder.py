@@ -16,7 +16,7 @@ class VariationalAutoEncoder:
     """
     An implementation of a variational autoencoder.
     """
-    def __init__(self, name: str, num_inputs: int, *args, **kwargs):
+    def __init__(self, name: str, num_inputs: int, latent_dim=20, *args, **kwargs):
         """
         :param name: the user specified name given for the neural network
         :param num_inputs: the number of inputs that goes into the model
@@ -32,9 +32,9 @@ class VariationalAutoEncoder:
         self.print_model_summary = False
 
         # Size of latent dimension
-        self.latent_dim = 20
+        self.latent_dim = latent_dim
 
-        # Specify the encoder layers [units, activation, dropout, l2, bias]
+        # Specify the encoder layers [units, activation, regularization, dropout, use_bias, dropout_type]
         self.encoder_layers = [
             [512, "relu", 0.0, 0.0, True, "gaussian"],
             [256, "relu", 0.0, 0.0, True, "gaussian"],
@@ -47,7 +47,7 @@ class VariationalAutoEncoder:
             [self.latent_dim, 1.0, False]
         ]
 
-        # Specify the decoder layers [units, activation, dropout, l2, bias]
+        # Specify the decoder layers [units, activation, regularization, dropout, use_bias, dropout_type]
         self.decoder_layers = [
             [128, "relu", 0.0, 0.0, True, "gaussian"],
             [256, "relu", 0.0, 0.0, True, "gaussian"],
@@ -62,10 +62,13 @@ class VariationalAutoEncoder:
         self.batch_size = 250
         # The learning rate used in optimization
         self.learning_rate = 0.001
-        # The optimization algorithm to use
-        self.optimizer = Adam(lr=self.learning_rate)
         # If this many stagnant epochs are seen, stop training
         self.stopping_patience = 10
+
+        self.__dict__.update(kwargs)
+
+        # The optimization algorithm to use
+        self.optimizer = Adam(lr=self.learning_rate)
 
         # --------------------------------------------------------------------------------
 
