@@ -99,7 +99,7 @@ def train_models():
 
     # import matplotlib.pyplot as plt
     #
-    # x_test_encoded, _, _ = vae.predict(data["x_test_flat"])
+    # x_test_encoded, _, _ = vae_mnist.predict(data["x_test_flat"])
     # f = plt.figure(figsize=(6, 6))
     # plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1], c=data["y_test"])
     # plt.colorbar()
@@ -133,8 +133,8 @@ def train_models():
     mlp_results = mlp.evaluate(data["x_test_flat"], data["y_test_one_hot"])
 
     # Get MLP labels
-    # y_mlp_train = mlp.predict(data["x_train_flat"])
-    # y_gen = mlp.predict(x_gen)
+    # y_mlp_train = mlp_mnist.predict(data["x_train_flat"])
+    # y_gen = mlp_mnist.predict(x_gen)
     #
     # x_both = join_data([data["x_train_flat"], x_gen])
     # y_both = join_data([y_mlp_train, y_gen])

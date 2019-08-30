@@ -117,7 +117,7 @@ def train_models():
 
     # import matplotlib.pyplot as plt
     #
-    # x_test_encoded, _, _ = vae.predict(data["x_test_flat"])
+    # x_test_encoded, _, _ = vae_mnist.predict(data["x_test_flat"])
     # f = plt.figure(figsize=(6, 6))
     # plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1], c=data["y_test"])
     # plt.colorbar()
@@ -192,14 +192,14 @@ def train_models():
     sdt_raw_results = sdt_raw.evaluate(x_test_flat_ds, y_test_one_hot_ds)
 
     # # Visualize tree
-    # draw_tree(sdt_raw, n_rows, n_cols)
+    # draw_tree(sdt_raw_mnist, n_rows, n_cols)
     #
     # digit = 1
     #
     # sample_index = np.random.choice(np.where(np.argmax(data["y_test_one_hot"], axis=1) == digit)[0])
     # input_img = data["x_test"][sample_index]
     #
-    # draw_tree(sdt_raw, n_rows, n_cols, input_img=input_img, show_correlation=True)
+    # draw_tree(sdt_raw_mnist, n_rows, n_cols, input_img=input_img, show_correlation=True)
     # quit(-1)
 
     # --------------------------------------------------------------------------------

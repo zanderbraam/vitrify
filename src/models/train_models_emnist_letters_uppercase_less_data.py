@@ -66,7 +66,7 @@ def train_models():
     )
 
     # Train VAE
-    vae.train(x_train_flat_ds, x_valid_flat_ds, load_model=False)
+    vae.train(x_train_flat_ds, x_valid_flat_ds, load_model=True)
 
     # Evaluate VAE
     vae_results = vae.evaluate(x_test_flat_ds)
@@ -90,7 +90,7 @@ def train_models():
 
     # import matplotlib.pyplot as plt
     #
-    # x_test_encoded, _, _ = vae.predict(data["x_test_flat"])
+    # x_test_encoded, _, _ = vae_mnist.predict(data["x_test_flat"])
     # f = plt.figure(figsize=(6, 6))
     # plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1], c=data["y_test"])
     # plt.colorbar()
@@ -125,7 +125,7 @@ def train_models():
     )
 
     # Train CNN
-    cnn.train(x_train_ds, y_train_one_hot_ds, x_valid_ds, y_valid_one_hot_ds, load_model=False)
+    cnn.train(x_train_ds, y_train_one_hot_ds, x_valid_ds, y_valid_one_hot_ds, load_model=True)
 
     # Evaluate CNN
     cnn_results = cnn.evaluate(x_test_ds, y_test_one_hot_ds)
@@ -161,20 +161,20 @@ def train_models():
     )
 
     # Train SDT RAW
-    sdt_raw.train(x_train_flat_ds, y_train_one_hot_ds, x_valid_flat_ds, y_valid_one_hot_ds, load_model=False)
+    sdt_raw.train(x_train_flat_ds, y_train_one_hot_ds, x_valid_flat_ds, y_valid_one_hot_ds, load_model=True)
 
     # Evaluate SDT RAW
     sdt_raw_results = sdt_raw.evaluate(x_test_flat_ds, y_test_one_hot_ds)
 
     # # Visualize tree
-    # draw_tree(sdt_raw, n_rows, n_cols)
+    # draw_tree(sdt_raw_mnist, n_rows, n_cols)
     #
     # digit = 1
     #
     # sample_index = np.random.choice(np.where(np.argmax(data["y_test_one_hot"], axis=1) == digit)[0])
     # input_img = data["x_test"][sample_index]
     #
-    # draw_tree(sdt_raw, n_rows, n_cols, input_img=input_img, show_correlation=True)
+    # draw_tree(sdt_raw_mnist, n_rows, n_cols, input_img=input_img, show_correlation=True)
     # quit(-1)
 
     # --------------------------------------------------------------------------------
@@ -198,7 +198,7 @@ def train_models():
     )
 
     # Train SDT CNN
-    sdt_cnn.train(x_train_flat_ds, y_cnn_train, x_valid_flat_ds, y_valid_one_hot_ds, load_model=False)
+    sdt_cnn.train(x_train_flat_ds, y_cnn_train, x_valid_flat_ds, y_valid_one_hot_ds, load_model=True)
 
     # Evaluate SDT CNN
     sdt_cnn_results = sdt_cnn.evaluate(x_test_flat_ds, y_test_one_hot_ds)
@@ -232,7 +232,7 @@ def train_models():
     )
 
     # Train SDT VAE
-    sdt_vae.train(x_both, y_both, x_valid_flat_ds, y_valid_one_hot_ds, load_model=False)
+    sdt_vae.train(x_both, y_both, x_valid_flat_ds, y_valid_one_hot_ds, load_model=True)
 
     # Evaluate SDT VAE
     sdt_vae_results = sdt_vae.evaluate(x_test_flat_ds, y_test_one_hot_ds)

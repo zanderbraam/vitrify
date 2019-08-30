@@ -187,7 +187,7 @@ class ConvDNN:
         # Finally compile the neural network so we can use it with the weights going forward
         cnn.compile(optimizer=self.optimizer, loss=self.objective, metrics=["accuracy"])
 
-        # Assign cnn to self.model
+        # Assign cnn_mnist to self.model
         self.model = cnn
         if self.print_model_summary:
             print("")

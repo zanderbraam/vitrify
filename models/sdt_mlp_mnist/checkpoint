@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/zander/thesis/vitrify/models/sdt_mlp_mnist/sdt_mlp_mnist"
+all_model_checkpoint_paths: "/home/zander/thesis/vitrify/models/sdt_mlp_mnist/sdt_mlp_mnist"

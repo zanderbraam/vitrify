@@ -215,7 +215,7 @@ class VariationalAutoEncoder:
         # Finally compile the variational autoencoder so we can use it with the weights going forward
         vae.compile(optimizer=self.optimizer, metrics=["acc"])
 
-        # Assign vae to self.model
+        # Assign vae_mnist to self.model
         self.model = vae
         self.encoder = encoder_model
         self.decoder = decoder_model

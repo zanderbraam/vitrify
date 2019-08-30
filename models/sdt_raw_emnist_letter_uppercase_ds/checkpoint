@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/zander/thesis/vitrify/models/sdt_raw_emnist_letter_uppercase_ds/sdt_raw_emnist_letter_uppercase_ds"
+all_model_checkpoint_paths: "/home/zander/thesis/vitrify/models/sdt_raw_emnist_letter_uppercase_ds/sdt_raw_emnist_letter_uppercase_ds"

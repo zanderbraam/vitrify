@@ -33,14 +33,12 @@ def train_models():
     unique, counts = np.unique(data["y_test"], return_counts=True)
     print(dict(zip(unique, counts)))
 
-    quit(-1)
-
     # --------------------------------------------------------------------------------
     # TRAIN THE VARIATIONAL AUTOENCODER TO FIT THE UNIT FUNCTION
 
     # Create VAE
     vae = VariationalAutoEncoder(
-        name="vae",
+        name="vae_mnist",
         num_inputs=n_features,
         epochs=1000
     )
@@ -73,7 +71,7 @@ def train_models():
 
     # Create MLP
     mlp = MultiLayerPerceptron(
-        name="mlp",
+        name="mlp_mnist",
         num_inputs=n_features,
         num_outputs=n_classes
     )
@@ -97,7 +95,7 @@ def train_models():
 
     # Create CNN
     cnn = ConvDNN(
-        name="cnn",
+        name="cnn_mnist",
         img_rows=n_rows,
         img_cols=n_cols,
         num_outputs=n_classes
@@ -113,12 +111,12 @@ def train_models():
     y_cnn_train = cnn.predict(data["x_train"])
     y_gen = cnn.predict(x_gen)
 
-    y_gen_labels = np.argmax(y_gen, axis=1)
-
-    unique, counts = np.unique(y_gen_labels, return_counts=True)
-    print(dict(zip(unique, counts)))
-
-    quit(-1)
+    # y_gen_labels = np.argmax(y_gen, axis=1)
+    #
+    # unique, counts = np.unique(y_gen_labels, return_counts=True)
+    # print(dict(zip(unique, counts)))
+    #
+    # quit(-1)
 
     x_both = join_data([data["x_train"], x_gen])
     x_both = x_both.reshape((x_both.shape[0], -1))
@@ -131,7 +129,7 @@ def train_models():
 
     # Create SDT
     sdt_raw = SoftBinaryDecisionTree(
-        name="sdt_raw",
+        name="sdt_raw_mnist",
         num_inputs=n_features,
         num_outputs=n_classes
     )
@@ -147,7 +145,7 @@ def train_models():
 
     # Create SDT CNN
     sdt_cnn = SoftBinaryDecisionTree(
-        name="sdt_cnn",
+        name="sdt_cnn_mnist",
         num_inputs=n_features,
         num_outputs=n_classes
     )
@@ -174,7 +172,7 @@ def train_models():
 
     # Create SDT VAE
     sdt_vae = SoftBinaryDecisionTree(
-        name="sdt_cnn_vae",
+        name="sdt_cnn_vae_mnist",
         num_inputs=n_features,
         num_outputs=n_classes
     )
