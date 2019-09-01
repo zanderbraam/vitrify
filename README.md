@@ -47,7 +47,9 @@ git lfs install
 
 Code was tested on [Python](https://www.python.org/) 3.5 with [TensorFlow](https://www.tensorflow.org/) version 1.10.0 and [matplotlib](https://matplotlib.org/) version 2.1.0.
 
-Example notebooks can be found at:
+# Example notebooks:
+
+To see how the code is used, please inspect the following notebooks:
 
 1. [vitrify_mnist.ipynb](./notebooks/vitrify_mnist.ipynb)
 
