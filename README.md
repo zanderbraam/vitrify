@@ -6,7 +6,7 @@ An abstract of the thesis follows:
 
 > As deep learning methods are becoming the front runner among machine learning techniques, the importance of
 > interpreting and understanding these methods grows. Deep neural networks are known for their highly competitive
-> prediction accuracies, but also infamously known for their ``black box'' properties when it comes to their decision
+> prediction accuracies, but also infamously known for their "black box" properties when it comes to their decision
 > making process. Tree-based models on the other end of the spectrum, are highly interpretable models, but lack the
 > predictive power with high dimensional data. The proposed solution of this thesis is to combine these two methods and
 > get the predictive accuracy from the complex learner, but also the explainability from the interpretable learner.
