@@ -22,8 +22,6 @@ An abstract of the thesis follows:
 > By artificially growing our training set, we can overcome the statistical inefficiencies of decision trees and
 > improve model accuracy.
 
-==============================
-
 # Installation on Linux
 
 After cloning the repository, create a virtual environment.
@@ -48,7 +46,6 @@ git lfs install
 ```
 
 Code was tested on [Python](https://www.python.org/) 3.5 with [TensorFlow](https://www.tensorflow.org/) version 1.10.0 and [matplotlib](https://matplotlib.org/) version 2.1.0.
-==============================
 
 Example notebooks can be found at:
 
@@ -92,4 +89,4 @@ Project Organization
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
 
-Code for the Soft Decision Trees was adapted from [https://github.com/lmartak/distill-nn-tree](https://github.com/lmartak/distill-nn-tree)
+Code for the Soft Decision Trees was adapted from [https://github.com/lmartak/distill-nn-tree](https://github.com/lmartak/distill-nn-tree).
