@@ -19,37 +19,19 @@ def train_models():
     n_features = n_rows * n_cols
     n_classes = np.unique(data["y_train"]).shape[0]
 
-    print(np.shape(data["x_train"]))
-    print(np.shape(data["y_train_one_hot"]))
-
+    # Print some info
     for key in data.keys():
         x = data[key]
         print(key, " : ", np.shape(x))
 
     unique, counts = np.unique(data["y_train"], return_counts=True)
-    print(dict(zip(unique, counts)))
+    print("y_train class count: ", dict(zip(unique, counts)))
 
     unique, counts = np.unique(data["y_valid"], return_counts=True)
-    print(dict(zip(unique, counts)))
+    print("y_valid class count: ", dict(zip(unique, counts)))
 
     unique, counts = np.unique(data["y_test"], return_counts=True)
-    print(dict(zip(unique, counts)))
-
-    # import matplotlib.pyplot as plt
-    #
-    # k = 0
-    #
-    # for img in data["x_train"]:
-    #
-    #     plt.figure(figsize=(1, 1))
-    #     plt.axis('off')
-    #     plt.imshow(img, cmap='gray')
-    #     print(data["y_train"][k])
-    #     plt.show()
-    #     plt.close()
-    #     k += 1
-    #
-    # quit(-1)
+    print("y_test class count: ", dict(zip(unique, counts)))
 
     # --------------------------------------------------------------------------------
     # TRAIN THE VARIATIONAL AUTOENCODER TO FIT THE UNIT FUNCTION
@@ -86,26 +68,6 @@ def train_models():
     # Reshape to images for CCN
     x_gen = np.array([np.reshape(x_gen_flat[i], [n_rows, n_cols]) for i in range(len(x_gen_flat))])
 
-    # import matplotlib.pyplot as plt
-    #
-    # for img in x_gen:
-    #     plt.figure(figsize=(1, 1))
-    #     plt.axis('off')
-    #     plt.imshow(img, cmap='gray')
-    #     plt.show()
-    #     plt.close()
-    #
-    # quit(-1)
-
-    # import matplotlib.pyplot as plt
-    #
-    # x_test_encoded, _, _ = vae_mnist.predict(data["x_test_flat"])
-    # f = plt.figure(figsize=(6, 6))
-    # plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1], c=data["y_test"])
-    # plt.colorbar()
-    # plt.show()
-    # plt.close()
-
     # --------------------------------------------------------------------------------
     # TRAIN THE MULTI-LAYER PERCEPTRON TO FIT THE MAPPING FUNCTION
 
@@ -133,8 +95,8 @@ def train_models():
     mlp_results = mlp.evaluate(data["x_test_flat"], data["y_test_one_hot"])
 
     # Get MLP labels
-    # y_mlp_train = mlp_mnist.predict(data["x_train_flat"])
-    # y_gen = mlp_mnist.predict(x_gen)
+    # y_mlp_train = mlp.predict(data["x_train_flat"])
+    # y_gen = mlp.predict(x_gen)
     #
     # x_both = join_data([data["x_train_flat"], x_gen])
     # y_both = join_data([y_mlp_train, y_gen])
@@ -176,11 +138,6 @@ def train_models():
     y_cnn_train = cnn.predict(data["x_train"])
     y_gen = cnn.predict(x_gen)
 
-    y_gen_labels = np.argmax(y_gen, axis=1)
-
-    unique, counts = np.unique(y_gen_labels, return_counts=True)
-    print(dict(zip(unique, counts)))
-
     x_both = join_data([data["x_train"], x_gen])
     x_both = x_both.reshape((x_both.shape[0], -1))
 
@@ -212,33 +169,6 @@ def train_models():
     # Evaluate SDT RAW
     sdt_raw_results = sdt_raw.evaluate(data["x_test_flat"], data["y_test_one_hot"])
 
-    # Visualize tree
-    draw_tree(sdt_raw, n_rows, n_cols)
-
-    digit = 1
-
-    sample_index = np.random.choice(np.where(np.argmax(data["y_test_one_hot"], axis=1) == digit)[0])
-    input_img = data["x_test"][sample_index]
-
-    draw_tree(sdt_raw, n_rows, n_cols, input_img=input_img, show_correlation=True)
-    # quit(-1)
-
-    # --------------------------------------------------------------------------------
-    # # TRAIN A SOFT DECISION TREE TO APPROXIMATE THE MULTI-LAYER PERCEPTRON
-    #
-    # # Create SDT MLP
-    # sdt_mlp = SoftBinaryDecisionTree(
-    #     name="sdt_mlp",
-    #     num_inputs=n_features,
-    #     num_outputs=n_classes
-    # )
-    #
-    # # Train SDT MLP
-    # sdt_mlp.train(data["x_train"], y_mlp_train, data["x_valid"], data["y_valid_one_hot"], load_model=True)
-    #
-    # # Evaluate SDT MLP
-    # sdt_mlp_results = sdt_mlp.evaluate(data["x_test_flat"], data["y_test_one_hot"])
-
     # --------------------------------------------------------------------------------
     # TRAIN A SOFT DECISION TREE TO APPROXIMATE THE CNN
 
@@ -263,14 +193,6 @@ def train_models():
 
     # Evaluate SDT CNN
     sdt_cnn_results = sdt_cnn.evaluate(data["x_test_flat"], data["y_test_one_hot"])
-
-    # digit = 8
-    #
-    # sample_index = np.random.choice(np.where(np.argmax(data["y_test_one_hot"], axis=1) == digit)[0])
-    # input_img = data["x_test"][sample_index]
-    #
-    # draw_tree(sdt_cnn, n_rows, n_cols, input_img=input_img, show_correlation=True)
-    # quit(-1)
 
     # --------------------------------------------------------------------------------
     # TRAIN A SOFT DECISION TREE TO APPROXIMATE THE CNN WITH VAE
@@ -299,11 +221,9 @@ def train_models():
 
     # --------------------------------------------------------------------------------
 
-    return vae_results, mlp_results, sdt_raw_results, sdt_cnn_results, sdt_vae_results
+    return vae_results, cnn_results, sdt_raw_results, sdt_cnn_results, sdt_vae_results
 
 
 if __name__ == '__main__':
 
     train_models()
-
-

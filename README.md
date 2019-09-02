@@ -54,7 +54,7 @@ To see how the code is used, please inspect the following notebooks:
 1. [vitrify_mnist.ipynb](./notebooks/vitrify_mnist.ipynb)
 2. [vitrify_fashion_mnist.ipynb](./notebooks/vitrify_fashion_mnist.ipynb)
 
-Project Organization
+# Project Organization
 ------------
 
     ├── LICENSE

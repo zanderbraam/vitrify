@@ -41,6 +41,16 @@ def train_models():
     x_test_ds = x_test_flat_ds.reshape((x_test_flat_ds.shape[0], n_rows, n_cols))
     y_test_one_hot_ds = tf.keras.utils.to_categorical(y_test_ds, n_classes)
 
+    # Print some info
+    unique, counts = np.unique(y_train_ds, return_counts=True)
+    print("y_train_ds class count: ", dict(zip(unique, counts)))
+
+    unique, counts = np.unique(y_valid_ds, return_counts=True)
+    print("y_valid_ds class count: ", dict(zip(unique, counts)))
+
+    unique, counts = np.unique(y_test_ds, return_counts=True)
+    print("y_test_ds class count: ", dict(zip(unique, counts)))
+
     # --------------------------------------------------------------------------------
     # TRAIN THE VARIATIONAL AUTOENCODER TO FIT THE UNIT FUNCTION
 
@@ -76,26 +86,6 @@ def train_models():
 
     # Reshape to images for CCN
     x_gen = np.array([np.reshape(x_gen_flat[i], [n_rows, n_cols]) for i in range(len(x_gen_flat))])
-
-    # import matplotlib.pyplot as plt
-    #
-    # for img in x_gen:
-    #     plt.figure(figsize=(1, 1))
-    #     plt.axis('off')
-    #     plt.imshow(img, cmap='gray')
-    #     plt.show()
-    #     plt.close()
-    #
-    # quit(-1)
-
-    # import matplotlib.pyplot as plt
-    #
-    # x_test_encoded, _, _ = vae_mnist.predict(data["x_test_flat"])
-    # f = plt.figure(figsize=(6, 6))
-    # plt.scatter(x_test_encoded[:, 0], x_test_encoded[:, 1], c=data["y_test"])
-    # plt.colorbar()
-    # plt.show()
-    # plt.close()
 
     # --------------------------------------------------------------------------------
     # TRAIN A CNN TO FIT THE MAPPING FUNCTION
@@ -166,17 +156,6 @@ def train_models():
     # Evaluate SDT RAW
     sdt_raw_results = sdt_raw.evaluate(x_test_flat_ds, y_test_one_hot_ds)
 
-    # # Visualize tree
-    # draw_tree(sdt_raw_mnist, n_rows, n_cols)
-    #
-    # digit = 1
-    #
-    # sample_index = np.random.choice(np.where(np.argmax(data["y_test_one_hot"], axis=1) == digit)[0])
-    # input_img = data["x_test"][sample_index]
-    #
-    # draw_tree(sdt_raw_mnist, n_rows, n_cols, input_img=input_img, show_correlation=True)
-    # quit(-1)
-
     # --------------------------------------------------------------------------------
     # TRAIN A SOFT DECISION TREE TO APPROXIMATE THE CNN
 
@@ -202,14 +181,6 @@ def train_models():
 
     # Evaluate SDT CNN
     sdt_cnn_results = sdt_cnn.evaluate(x_test_flat_ds, y_test_one_hot_ds)
-
-    # digit = 8
-    #
-    # sample_index = np.random.choice(np.where(np.argmax(data["y_test_one_hot"], axis=1) == digit)[0])
-    # input_img = data["x_test"][sample_index]
-    #
-    # draw_tree(sdt_cnn, n_rows, n_cols, input_img=input_img, show_correlation=True)
-    # quit(-1)
 
     # --------------------------------------------------------------------------------
     # TRAIN A SOFT DECISION TREE TO APPROXIMATE THE CNN WITH VAE
@@ -239,11 +210,9 @@ def train_models():
 
     # --------------------------------------------------------------------------------
 
-    return vae_results, sdt_raw_results, sdt_cnn_results, sdt_vae_results
+    return vae_results, cnn_results, sdt_raw_results, sdt_cnn_results, sdt_vae_results
 
 
 if __name__ == '__main__':
 
     train_models()
-
-

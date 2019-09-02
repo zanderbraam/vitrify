@@ -22,7 +22,21 @@ def train_models():
     class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
                    'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
 
-    # # --------------------------------------------------------------------------------
+    # Print some info
+    for key in data.keys():
+        x = data[key]
+        print(key, " : ", np.shape(x))
+
+    unique, counts = np.unique(data["y_train"], return_counts=True)
+    print("y_train class count: ", dict(zip(unique, counts)))
+
+    unique, counts = np.unique(data["y_valid"], return_counts=True)
+    print("y_valid class count: ", dict(zip(unique, counts)))
+
+    unique, counts = np.unique(data["y_test"], return_counts=True)
+    print("y_test class count: ", dict(zip(unique, counts)))
+
+    # --------------------------------------------------------------------------------
     # TRAIN THE VARIATIONAL AUTOENCODER TO FIT THE UNIT FUNCTION
 
     # Create VAE
@@ -56,17 +70,6 @@ def train_models():
 
     # Reshape to images for CCN
     x_gen = np.array([np.reshape(x_gen_flat[i], [n_rows, n_cols]) for i in range(len(x_gen_flat))])
-
-    # import matplotlib.pyplot as plt
-    #
-    # for img in x_gen:
-    #     plt.figure(figsize=(1, 1))
-    #     plt.axis('off')
-    #     plt.imshow(img, cmap='gray')
-    #     plt.show()
-    #     plt.close()
-    #
-    # quit(-1)
 
     # --------------------------------------------------------------------------------
     # TRAIN THE MULTI-LAYER PERCEPTRON TO FIT THE MAPPING FUNCTION
@@ -115,13 +118,6 @@ def train_models():
     y_cnn_train = cnn.predict(data["x_train"])
     y_gen = cnn.predict(x_gen)
 
-    y_gen_labels = np.argmax(y_gen, axis=1)
-
-    unique, counts = np.unique(y_gen_labels, return_counts=True)
-    print(dict(zip(unique, counts)))
-
-    quit(-1)
-
     x_both = join_data([data["x_train"], x_gen])
     x_both = x_both.reshape((x_both.shape[0], -1))
 
@@ -151,16 +147,6 @@ def train_models():
 
     # Evaluate SDT RAW
     sdt_raw_results = sdt_raw.evaluate(data["x_test_flat"], data["y_test_one_hot"])
-
-    # Visualize tree
-    draw_tree(sdt_raw, n_rows, n_cols)
-
-    digit = 6
-
-    sample_index = np.random.choice(np.where(np.argmax(data["y_test_one_hot"], axis=1) == digit)[0])
-    input_img = data["x_test"][sample_index]
-
-    draw_tree(sdt_raw, n_rows, n_cols, input_img=input_img, show_correlation=True)
 
     # --------------------------------------------------------------------------------
     # # TRAIN A SOFT DECISION TREE TO APPROXIMATE THE MULTI-LAYER PERCEPTRON
@@ -202,14 +188,6 @@ def train_models():
     # Evaluate SDT CNN
     sdt_cnn_results = sdt_cnn.evaluate(data["x_test_flat"], data["y_test_one_hot"])
 
-    digit = 6
-
-    sample_index = np.random.choice(np.where(np.argmax(data["y_test_one_hot"], axis=1) == digit)[0])
-    input_img = data["x_test"][sample_index]
-
-    draw_tree(sdt_cnn, n_rows, n_cols, input_img=input_img, show_correlation=True)
-    quit(-1)
-
     # --------------------------------------------------------------------------------
     # TRAIN A SOFT DECISION TREE TO APPROXIMATE THE CNN WITH VAE
 
@@ -236,11 +214,9 @@ def train_models():
 
     # --------------------------------------------------------------------------------
 
-    return vae_results, mlp_results, sdt_raw_results, sdt_cnn_results, sdt_vae_results
+    return vae_results, cnn_results, sdt_raw_results, sdt_cnn_results, sdt_vae_results
 
 
 if __name__ == '__main__':
 
     train_models()
-
-
