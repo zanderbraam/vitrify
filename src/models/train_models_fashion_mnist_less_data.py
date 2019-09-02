@@ -117,7 +117,7 @@ def train_models():
             ["max_pool2d", (2, 2), None, "valid", 0.0],
             ["conv2d", 64, (3, 3), (1, 1), "valid", "relu", True, 0.0, 0.0, 0.0, 0.2],
             ["conv2d", 64, (3, 3), (1, 1), "valid", "relu", True, 0.0, 0.0, 0.0, 0.2],
-            ["max_pool2d", (2, 2), None, "valid", 0.0],
+            ["max_pool2d", (2, 2), None, "valid", 0.0]
         ],
         ff_layers=[
             [512, "relu", 0.0, 0.2, True, "normal"],
@@ -159,7 +159,7 @@ def train_models():
         penalty_strength=1e+1,
         batch_size=4,
         learning_rate=5e-03,
-        stopping_patience=10,
+        stopping_patience=10
     )
 
     # Train SDT RAW
@@ -194,7 +194,7 @@ def train_models():
         penalty_strength=1e+1,
         batch_size=4,
         learning_rate=5e-03,
-        stopping_patience=5,
+        stopping_patience=5
     )
 
     # Train SDT CNN
