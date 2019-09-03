@@ -34,6 +34,15 @@ pip install numpy
 pip install -r requirements.txt
 ```
 
+For GPU usage (recommended), rather do:
+
+```
+virtualenv ve -p `which python3.6`
+source ./ve/bin/activate
+pip install numpy
+pip install -r requirements_gpu.txt
+```
+
 Also, please do the following for plotting decision trees:
 
 ```
@@ -53,6 +62,8 @@ To see how the code is used, please inspect the following notebooks:
 
 1. [vitrify_mnist.ipynb](./notebooks/vitrify_mnist.ipynb)
 2. [vitrify_fashion_mnist.ipynb](./notebooks/vitrify_fashion_mnist.ipynb)
+3. [vitrify_emnist_letter.ipynb](./notebooks/vitrify_emnist_letter.ipynb)
+4. [vitrify_emnist_letter_uppercase.ipynb](./notebooks/vitrify_emnist_letter_uppercase.ipynb)
 
 # Project Organization
 ------------
