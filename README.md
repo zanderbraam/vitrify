@@ -45,7 +45,7 @@ Git Large File Storage ([git-lfs](https://git-lfs.github.com/)) is used to store
 git lfs install
 ```
 
-Code was tested on [Python](https://www.python.org/) 3.5 with [TensorFlow](https://www.tensorflow.org/) version 1.10.0 and [matplotlib](https://matplotlib.org/) version 2.1.0.
+Code was tested on [Python](https://www.python.org/) 3.6 with [TensorFlow](https://www.tensorflow.org/) version 1.10.0 and [matplotlib](https://matplotlib.org/) version 2.1.0.
 
 # Example notebooks:
 
