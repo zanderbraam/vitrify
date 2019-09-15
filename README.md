@@ -80,8 +80,9 @@ To see how the code is used, please inspect the following notebooks:
     │
     ├── notebooks          <- Jupyter notebooks.
     │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
+    ├── requirements.txt       <- The requirements file for reproducing the analysis environment, e.g.
+    │                             generated with `pip freeze > requirements.txt`
+    ├── requirements_gpu.txt   <- The requirements file for reproducing the analysis environment (using GPU)
     │
     ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
     ├── src                <- Source code for use in this project.
